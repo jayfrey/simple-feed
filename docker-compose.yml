@@ -1,0 +1,10 @@
+version: "3.7"
+
+services:
+  crawler:
+    build:
+      context: ./crawler
+    volumes:
+      - ./crawler:/app
+    stdin_open: true
+    tty: true
