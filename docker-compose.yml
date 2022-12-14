@@ -8,3 +8,30 @@ services:
       - ./crawler:/app
     stdin_open: true
     tty: true
+    environment:
+      - MONGO_URI=mongodb://admin:abc@mongo:27017
+      - MONGO_DB=scraped_data
+    depends_on:
+      - mongo
+    networks:
+      - simple_feed
+
+  mongo:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: abc
+    expose:
+      - 27017
+    ports:
+      - 28000:27017
+    volumes:
+      - mongo:/data/db
+    networks:
+      - simple_feed
+
+volumes:
+  mongo:
+
+networks:
+  simple_feed:
