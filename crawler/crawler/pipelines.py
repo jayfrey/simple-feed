@@ -17,7 +17,7 @@ class CrawlerPipeline:
 
 class MongoDBPipeline:
     """
-    NOTE: This is not only use for development purpose. Do not use it in production.
+    NOTE: This is only use for development purpose. Do not use it in production.
     To enable MongoDBPipeline, be sure the it's uncommented in setting.py
 
     This is quick and dirty way for you to explore the data in mongodb
