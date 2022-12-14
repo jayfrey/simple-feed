@@ -26,7 +26,7 @@ MONGO_URI = os.environ.get("MONGO_URI")
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'crawler (+http://www.yourdomain.com)'
+USER_AGENT = "simple feed"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True

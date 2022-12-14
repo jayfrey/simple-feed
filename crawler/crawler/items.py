@@ -3,10 +3,16 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/items.html
 
-import scrapy
+from scrapy import Item, Field
 
 
-class CrawlerItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class Article(Item):
+    title = Field()
+    article_image_url = Field()
+    published_date = Field()
+    publisher_name = Field()
+    article_content = Field()
+    article_url = Field()
+    topic = Field()
+    tags = Field()
+    source = Field()
