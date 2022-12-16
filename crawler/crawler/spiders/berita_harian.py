@@ -32,7 +32,7 @@ class BeritaHarianSpider(Spider):
             item = Article()
 
             item["title"] = article["title"]
-            item["article_image_url"] = article["field_article_images"][0]["url"]
+            item["image_url"] = article["field_article_images"][0]["url"]
 
             item["published_date"] = (
                 datetime.fromtimestamp(article["created"]) + timedelta(hours=8)
@@ -41,8 +41,8 @@ class BeritaHarianSpider(Spider):
             if article["field_article_author"]:
                 item["publisher_name"] = article["field_article_author"]["name"]
 
-            item["html_article_content"] = article["body"]
-            item["article_url"] = article["url"]
+            item["html_content"] = article["body"]
+            item["page_url"] = article["url"]
             item["topic"] = article["field_article_topic"]["name"]
 
             if article["field_tags"]:

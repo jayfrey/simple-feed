@@ -35,17 +35,15 @@ class FreeMalaysiaTodaySpider(CrawlSpider):
         content = soup.find("div", class_="td-post-content")
 
         item["title"] = header.find("h1", class_="entry-title").text
-        item["article_image_url"] = content.find("img")["data-cfsrc"]
+        item["image_url"] = content.find("img")["data-cfsrc"]
         item["published_date"] = datetime.strptime(
             header.find("time")["datetime"], "%Y-%m-%dT%H:%M:%S%z"
         ).strftime(DEFAULT_DATETIME_FORMAT)
         item["publisher_name"] = (
             header.find("div", class_="td-post-author-name").find("a").text
         )
-        item["html_article_content"] = "".join(
-            map(str, content.find_all(["figure", "p"])[1:])
-        )
-        item["article_url"] = response.url
+        item["html_content"] = "".join(map(str, content.find_all(["figure", "p"])[1:]))
+        item["page_url"] = response.url
         item["topic"] = urlparse(response.url).path.split("/")[2]
         item["tags"] = [
             tag.text for tag in soup.find("ul", class_="td-tags").find_all("li")[1:]

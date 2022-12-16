@@ -63,7 +63,7 @@ class SaysSpider(CrawlSpider):
         article_meta = soup.find("div", class_="story-meta").find("p")
 
         item["title"] = soup.find("h1", class_="story-title").text
-        item["article_image_url"] = re.search(
+        item["image_url"] = re.search(
             "background-image:url\('(.+?)'\);",
             soup.find("div", class_="story-cover-image")["style"],
         )[1]
@@ -71,8 +71,8 @@ class SaysSpider(CrawlSpider):
             article_meta.text.split("—")[1].strip(), "%d %b %Y, %I:%M %p"
         ).strftime(DEFAULT_DATETIME_FORMAT)
         item["publisher_name"] = article_meta.find("a").text
-        item["html_article_content"] = "".join(filter_article_content(soup))
-        item["article_url"] = response.url
+        item["html_content"] = "".join(filter_article_content(soup))
+        item["page_url"] = response.url
         item["topic"] = urlparse(response.url).path.split("/")[2]
         item["tags"] = [
             tag.text[1:] for tag in soup.find_all("a", class_="story-hashtag")
