@@ -1,8 +1,10 @@
 from scrapy.spiders import Spider, Request
-from datetime import datetime
+from datetime import datetime, timedelta
 from crawler.items import Article
+from ..constants import DEFAULT_DATETIME_FORMAT
 
 import json
+import urllib.parse
 
 
 class BeritaHarianSpider(Spider):
@@ -12,8 +14,13 @@ class BeritaHarianSpider(Spider):
     base_url = "https://www.bharian.com.my/"
 
     def parse(self, response):
+        url = self.base_url + "api/articles?"
+        params = {
+            "sttl": "true",
+            "page_size": "8",
+        }
         yield Request(
-            "https://www.bharian.com.my/api/articles?sttl=true&page_size=8",
+            url + urllib.parse.urlencode(params),
             self.parse_latest_articles,
         )
 
@@ -26,7 +33,10 @@ class BeritaHarianSpider(Spider):
 
             item["title"] = article["title"]
             item["article_image_url"] = article["field_article_images"][0]["url"]
-            item["published_date"] = datetime.fromtimestamp(article["created"])
+
+            item["published_date"] = (
+                datetime.fromtimestamp(article["created"]) + timedelta(hours=8)
+            ).strftime(DEFAULT_DATETIME_FORMAT)
 
             if article["field_article_author"]:
                 item["publisher_name"] = article["field_article_author"]["name"]
@@ -36,7 +46,7 @@ class BeritaHarianSpider(Spider):
             item["topic"] = article["field_article_topic"]["name"]
 
             if article["field_tags"]:
-                item["tags"] = ", ".join([tag["name"] for tag in article["field_tags"]])
+                item["tags"] = [tag["name"] for tag in article["field_tags"]]
 
             item["source"] = self.name
 

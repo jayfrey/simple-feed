@@ -4,6 +4,7 @@ from crawler.items import Article
 from bs4 import BeautifulSoup
 from scrapy.linkextractors import LinkExtractor
 from urllib.parse import urlparse
+from ..constants import DEFAULT_DATETIME_FORMAT
 
 
 class FreeMalaysiaTodaySpider(CrawlSpider):
@@ -20,6 +21,7 @@ class FreeMalaysiaTodaySpider(CrawlSpider):
                 restrict_xpaths=".//div[@id='td_uid_8_5dc2b695b82d9']",
                 attrs=["href"],
                 tags=["a"],
+                allow_domains=allowed_domains,
             ),
             callback="parse_latest_articles",
             follow=True,
@@ -34,7 +36,9 @@ class FreeMalaysiaTodaySpider(CrawlSpider):
 
         item["title"] = header.find("h1", class_="entry-title").text
         item["article_image_url"] = content.find("img")["data-cfsrc"]
-        item["published_date"] = header.find("time")["datetime"]
+        item["published_date"] = datetime.strptime(
+            header.find("time")["datetime"], "%Y-%m-%dT%H:%M:%S%z"
+        ).strftime(DEFAULT_DATETIME_FORMAT)
         item["publisher_name"] = (
             header.find("div", class_="td-post-author-name").find("a").text
         )
@@ -43,9 +47,9 @@ class FreeMalaysiaTodaySpider(CrawlSpider):
         )
         item["article_url"] = response.url
         item["topic"] = urlparse(response.url).path.split("/")[2]
-        item["tags"] = ", ".join(
-            [tag.text for tag in soup.find("ul", class_="td-tags").find_all("li")[1:]]
-        )
+        item["tags"] = [
+            tag.text for tag in soup.find("ul", class_="td-tags").find_all("li")[1:]
+        ]
         item["source"] = self.name
 
         yield item
