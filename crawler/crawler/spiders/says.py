@@ -71,7 +71,7 @@ class SaysSpider(CrawlSpider):
             article_meta.text.split("—")[1].strip(), "%d %b %Y, %I:%M %p"
         ).strftime(DEFAULT_DATETIME_FORMAT)
         item["publisher_name"] = article_meta.find("a").text
-        item["article_content"] = "".join(filter_article_content(soup))
+        item["html_article_content"] = "".join(filter_article_content(soup))
         item["article_url"] = response.url
         item["topic"] = urlparse(response.url).path.split("/")[2]
         item["tags"] = [

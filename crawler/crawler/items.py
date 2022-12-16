@@ -11,7 +11,7 @@ class Article(Item):
     article_image_url = Field()
     published_date = Field()
     publisher_name = Field()
-    article_content = Field()
+    html_article_content = Field()
     article_url = Field()
     topic = Field()
     tags = Field()

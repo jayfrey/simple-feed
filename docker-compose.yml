@@ -13,8 +13,9 @@ services:
       - MONGO_DB=scraped_data
     depends_on:
       - mongo
+      - postgres
     networks:
-      - simple_feed
+      - simple_news_feed
 
   mongo:
     image: mongo:latest
@@ -26,12 +27,36 @@ services:
     ports:
       - 28000:27017
     volumes:
-      - mongo:/data/db
+      - mongo_data:/db
     networks:
-      - simple_feed
+      - simple_news_feed
+
+  sqitch:
+    image: sqitch/sqitch:v1.3.1
+    volumes:
+      - ./sqitch:/repo
+    networks:
+      - simple_news_feed
+
+  postgres:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=abc
+      - POSTGRES_DB=simple_news_feed
+    expose:
+      - 5432
+    ports:
+      - 65432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - simple_news_feed
+
 
 volumes:
-  mongo:
+  mongo_data:
+  postgres_data:
 
 networks:
-  simple_feed:
+  simple_news_feed:

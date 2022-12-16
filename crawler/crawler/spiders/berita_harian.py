@@ -41,7 +41,7 @@ class BeritaHarianSpider(Spider):
             if article["field_article_author"]:
                 item["publisher_name"] = article["field_article_author"]["name"]
 
-            item["article_content"] = article["body"]
+            item["html_article_content"] = article["body"]
             item["article_url"] = article["url"]
             item["topic"] = article["field_article_topic"]["name"]
 

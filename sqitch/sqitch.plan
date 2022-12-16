@@ -1,0 +1,4 @@
+%syntax-version=1.0.0
+%project=sqitch
+
+articles 2022-12-16T11:26:26Z sqitch <sqitch@cc95118e5bee> # Create articles table

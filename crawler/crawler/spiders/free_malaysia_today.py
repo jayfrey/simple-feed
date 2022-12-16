@@ -42,7 +42,7 @@ class FreeMalaysiaTodaySpider(CrawlSpider):
         item["publisher_name"] = (
             header.find("div", class_="td-post-author-name").find("a").text
         )
-        item["article_content"] = "".join(
+        item["html_article_content"] = "".join(
             map(str, content.find_all(["figure", "p"])[1:])
         )
         item["article_url"] = response.url
