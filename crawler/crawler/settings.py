@@ -17,11 +17,14 @@ NEWSPIDER_MODULE = "crawler.spiders"
 LOG_LEVEL = "INFO"
 
 ITEM_PIPELINES = {
-    "crawler.pipelines.MongoDBPipeline": 0,
+    # "crawler.pipelines.MongoDBPipeline": 0,
+    "crawler.pipelines.PostgresDBPipeline": 0,
 }
 
 MONGO_DB = os.environ.get("MONGO_DB")
 MONGO_URI = os.environ.get("MONGO_URI")
+
+POSTGRES_DETAILS = os.environ.get("POSTGRES_DETAILS")
 
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 

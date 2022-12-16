@@ -41,6 +41,7 @@ def filter_article_content(soup):
 
 class SaysSpider(CrawlSpider):
     name = "says"
+    table_name = "articles"
     allowed_domains = ["says.com"]
     start_urls = ["http://says.com/my"]
 

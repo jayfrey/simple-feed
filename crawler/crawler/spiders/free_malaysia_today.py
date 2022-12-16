@@ -9,6 +9,7 @@ from ..constants import DEFAULT_DATETIME_FORMAT
 
 class FreeMalaysiaTodaySpider(CrawlSpider):
     name = "free_malaysia_today"
+    table_name = "articles"
     allowed_domains = ["www.freemalaysiatoday.com"]
     start_urls = ["https://www.freemalaysiatoday.com/"]
     base_url = "https://www.freemalaysiatoday.com/"

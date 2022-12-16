@@ -47,7 +47,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
-    dcm.start_docker_compose(args, ["up", "-d", "mongo"])
+    dcm.start_docker_compose(args, ["up", "-d", "mongo", "postgres"])
     print(args)
 
     print("Sleep for 10s to make sure it is started porperly")

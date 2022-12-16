@@ -9,6 +9,7 @@ import urllib.parse
 
 class BeritaHarianSpider(Spider):
     name = "berita_harian"
+    table_name = "articles"
     allowed_domains = ["www.bharian.com.my"]
     start_urls = ["https://www.bharian.com.my/"]
     base_url = "https://www.bharian.com.my/"

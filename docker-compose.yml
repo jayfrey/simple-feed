@@ -11,6 +11,7 @@ services:
     environment:
       - MONGO_URI=mongodb://admin:abc@mongo:27017
       - MONGO_DB=scraped_data
+      - POSTGRES_DETAILS=dbname=simple_news_feed user=admin password=abc host=postgres
     depends_on:
       - mongo
       - postgres
