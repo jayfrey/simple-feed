@@ -37,7 +37,7 @@ docker ps
 ## Instruction on scraping
 To start scraping latest news articles from all of the social news
 ```sh
-python cli/crawler.py
+python cli/scrape_articles.py
 ```
 
 ### Usage
