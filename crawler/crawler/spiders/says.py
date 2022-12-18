@@ -1,4 +1,4 @@
-from scrapy.spiders import Spider, CrawlSpider, Rule
+from scrapy.spiders import Spider, Request
 from datetime import datetime
 from crawler.items import Article
 from bs4 import BeautifulSoup
@@ -39,45 +39,91 @@ def filter_article_content(soup):
     return filtered_article_content
 
 
-class SaysSpider(CrawlSpider):
+class SaysSpider(Spider):
     name = "says"
     table_name = "articles"
     allowed_domains = ["says.com"]
     start_urls = ["http://says.com/my"]
 
-    rules = [
-        Rule(
-            LinkExtractor(
-                restrict_xpaths=".//ul[contains(@class, 'news-feed-items')]/li/div[1]",
-                attrs=["href"],
-                tags=["a"],
-                allow_domains=allowed_domains,
-            ),
-            callback="parse_latest_articles",
-            follow=True,
-        ),
-    ]
+    def parse(self, response):
+        links = LinkExtractor(
+            allow=r"(https:\/\/says.com\/my)(.+?)+",
+            attrs=["href"],
+            tags=["a"],
+            restrict_xpaths=[
+                ".//ul[contains(@class, 'channels')]/*/a[contains(@class, 'ga-channel')]",
+                ".//ul[contains(@class, 'channels')]/*/*/a[contains(@class, 'ga-channel')]",
+            ],
+            allow_domains=self.allowed_domains,
+        ).extract_links(response)
 
-    def parse_latest_articles(self, response):
-        item = Article()
-        soup = BeautifulSoup(response.body, "lxml")
-        article_meta = soup.find("div", class_="story-meta").find("p")
+        for link in links:
+            yield Request(
+                link.url,
+                self.parse_category,
+            )
 
-        item["title"] = soup.find("h1", class_="story-title").text
-        item["image_url"] = re.search(
-            "background-image:url\('(.+?)'\);",
-            soup.find("div", class_="story-cover-image")["style"],
-        )[1]
-        item["published_date"] = datetime.strptime(
-            article_meta.text.split("—")[1].strip(), "%d %b %Y, %I:%M %p"
-        ).strftime(DEFAULT_DATETIME_FORMAT)
-        item["publisher_name"] = article_meta.find("a").text
-        item["html_content"] = "".join(filter_article_content(soup))
-        item["page_url"] = response.url
-        item["topic"] = urlparse(response.url).path.split("/")[2]
-        item["tags"] = [
-            tag.text[1:] for tag in soup.find_all("a", class_="story-hashtag")
-        ]
-        item["source"] = self.name
+    def parse_category(self, response):
+        # LATEST TOP
+        links = LinkExtractor(
+            attrs=["href"],
+            tags=["a"],
+            restrict_xpaths=[
+                ".//div[@class='channel-story-info']/h3",
+            ],
+            allow_domains=self.allowed_domains,
+        ).extract_links(response)
+        for link in links:
+            yield Request(
+                link.url,
+                self.parse_article,
+            )
 
-        yield item
+        # LATEST MAIN
+        links = LinkExtractor(
+            attrs=["href"],
+            tags=["a"],
+            restrict_xpaths=[
+                ".//ul[contains(@class, 'news-feed-items')]/*/div[contains(@class, 'story-info')]/h3",
+            ],
+            allow_domains=self.allowed_domains,
+        ).extract_links(response)
+        for link in links:
+            yield Request(
+                link.url,
+                self.parse_article,
+            )
+
+    def parse_article(self, response):
+
+        if not (
+            re.search(r"(https:\/\/exclusive.says.com\/my)(.+?)+", response.url)
+            or re.search(r"(https:\/\/says.com\/my\/exclusive)(.+?)+", response.url)
+        ):
+            item = Article()
+            soup = BeautifulSoup(response.body, "lxml")
+
+            item["title"] = soup.find("h1", class_="story-title").text
+            item["image_url"] = re.search(
+                "background-image:url\('(.+?)'\);",
+                soup.find("div", class_="story-cover-image")["style"],
+            )[1]
+
+            article_meta = soup.find("div", class_="story-meta").find("p")
+            published_date = article_meta.contents[2].strip()[2:23]
+
+            if published_date:
+                item["published_date"] = datetime.strptime(
+                    published_date, "%d %b %Y, %I:%M %p"
+                ).strftime(DEFAULT_DATETIME_FORMAT)
+            item["publisher_name"] = article_meta.find("a").text
+
+            item["html_content"] = "".join(filter_article_content(soup))
+            item["page_url"] = response.url
+            item["topic"] = urlparse(response.url).path.split("/")[2]
+            item["tags"] = [
+                tag.text[1:] for tag in soup.find_all("a", class_="story-hashtag")
+            ]
+            item["source"] = self.name
+
+            yield item

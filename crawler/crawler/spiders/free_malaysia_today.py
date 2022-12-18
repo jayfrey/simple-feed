@@ -1,4 +1,4 @@
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy.spiders import Spider, Request
 from datetime import datetime
 from crawler.items import Article
 from bs4 import BeautifulSoup
@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from ..constants import DEFAULT_DATETIME_FORMAT
 
 
-class FreeMalaysiaTodaySpider(CrawlSpider):
+class FreeMalaysiaTodaySpider(Spider):
     name = "free_malaysia_today"
     table_name = "articles"
     allowed_domains = ["www.freemalaysiatoday.com"]
@@ -16,20 +16,51 @@ class FreeMalaysiaTodaySpider(CrawlSpider):
 
     user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36"
 
-    rules = [
-        Rule(
-            LinkExtractor(
-                restrict_xpaths=".//div[@id='td_uid_8_5dc2b695b82d9']",
-                attrs=["href"],
-                tags=["a"],
-                allow_domains=allowed_domains,
-            ),
-            callback="parse_latest_articles",
-            follow=True,
-        ),
-    ]
+    def parse(self, response):
+        links = LinkExtractor(
+            allow=r"(https:\/\/www.freemalaysiatoday.com\/category\/category)(.+?)+",
+            attrs=["href"],
+            tags=["a"],
+            restrict_xpaths=[".//div[@id='td-header-menu']"],
+            allow_domains=self.allowed_domains,
+        ).extract_links(response)
 
-    def parse_latest_articles(self, response):
+        for link in links:
+            yield Request(
+                link.url,
+                self.parse_category,
+            )
+
+    def parse_category(self, response):
+        # LATEST
+        links = LinkExtractor(
+            attrs=["href"],
+            tags=["a"],
+            restrict_xpaths=[".//div[contains(@class, 'td-category-grid')]"],
+            allow_domains=self.allowed_domains,
+        ).extract_links(response)
+
+        for link in links:
+            yield Request(
+                link.url,
+                self.parse_article,
+            )
+
+        # MAIN
+        links = LinkExtractor(
+            attrs=["href"],
+            tags=["a"],
+            restrict_xpaths=[".//div[contains(@class, 'td-ss-main-content')]"],
+            allow_domains=self.allowed_domains,
+        ).extract_links(response)
+
+        for link in links:
+            yield Request(
+                link.url,
+                self.parse_article,
+            )
+
+    def parse_article(self, response):
         item = Article()
         soup = BeautifulSoup(response.body, "lxml")
         header = soup.find("header", class_="td-post-title")

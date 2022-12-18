@@ -6,8 +6,11 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+from scrapy.utils.reactor import install_reactor
 
 import os
+
+install_reactor("twisted.internet.asyncioreactor.AsyncioSelectorReactor")
 
 BOT_NAME = "crawler"
 
@@ -25,8 +28,6 @@ MONGO_DB = os.environ.get("MONGO_DB")
 MONGO_URI = os.environ.get("MONGO_URI")
 
 POSTGRES_DETAILS = os.environ.get("POSTGRES_DETAILS")
-
-REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "simple feed"
