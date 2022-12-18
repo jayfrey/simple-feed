@@ -14,7 +14,7 @@ A simple news feed that scrape articles from social news (namely SAYS, Free Mala
 * Python (3.9.14)
 
 ## Installation
-Navigate to the app folder in terminal and run the following commands in sequence.
+Navigate to the app folder in terminal and run the following commands in sequence
 ```sh
 cd simple-news-feed
 ```
@@ -61,5 +61,5 @@ python cli/scrape_articles.py -s free_malaysia_today berita_harian
 ```
 
 ### Get the latest news article
-A simple API to get the latest news articles is available [here](http://localhost:3000/articles/latest)
+A simple API to get the latest news articles is available [here](http://localhost:3000/articles/latest) (Assuming all of the necessary services have started and are in healthy state)
 
