@@ -16,7 +16,7 @@ sequelize = new Sequelize(
   dbConfig.username,
   dbConfig.password,
   {
-    host: dbConfig.database,
+    host: dbConfig.host,
     dialect: dbConfig.dialect,
     dialectOptions: {
       useUTC: false, // for reading from database
@@ -27,6 +27,12 @@ sequelize = new Sequelize(
       min: 0,
       acquire: 30000,
       idle: 10000,
+    },
+    // Enforce timestamp column to be in underscored
+    define: {
+      underscored: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
     },
   }
 );

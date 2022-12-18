@@ -1,4 +1,9 @@
-FROM node:alpine
+FROM node:alpine3.17
+
+# Set local timezone
+RUN apk add --no-cache tzdata
+ENV TZ=Asia/Kuala_Lumpur
+
 # Add a work directory
 WORKDIR /app
 # Cache and Install dependencies

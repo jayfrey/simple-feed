@@ -1,12 +1,24 @@
-const controller = require("./controllers");
+const express = require("express");
+const articleRouter = express.Router();
+const ArticleController = require("./controllers/ArticleController");
+
+const statusCodes = require("http").STATUS_CODES;
+const httpConstants = require("http2").constants;
 
 module.exports = (app) => {
-  app.get("/", controller.index);
-  app.get("/ping", controller.ping);
+  app.get("/", (req, res) => {
+    res
+      .status(httpConstants.HTTP_STATUS_OK)
+      .send(statusCodes[httpConstants.HTTP_STATUS_OK]);
+  });
 
-  // Creates the endpoint for our webhook
-  // app.post("/webhook", controller.handle_webbook);
+  app.get("/healthcheck", (req, res) => {
+    res
+      .status(httpConstants.HTTP_STATUS_OK)
+      .send(statusCodes[httpConstants.HTTP_STATUS_OK]);
+  });
 
-  // Adds support for GET requests to our webhook
-  // app.sget("/webhook", controller.verify_webhook);
+  articleRouter.route("/").get(ArticleController.index);
+  articleRouter.route("/latest").get(ArticleController.getLatestArticles);
+  app.use("/articles", articleRouter);
 };

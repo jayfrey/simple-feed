@@ -3,6 +3,7 @@ const options = {
   host: "0.0.0.0",
   port: 3000,
   timeout: 2000,
+  path: "/healthcheck",
 };
 
 const healthCheck = http.request(options, (res) => {
