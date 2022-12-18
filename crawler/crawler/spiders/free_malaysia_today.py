@@ -17,6 +17,8 @@ class FreeMalaysiaTodaySpider(Spider):
 
     user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36"
 
+    processed_url = dict()
+
     def parse(self, response):
         # Get and filter menu
         menus = response.xpath(".//ul[@id='menu-header-menu-1']/li")[0:9]
@@ -33,6 +35,7 @@ class FreeMalaysiaTodaySpider(Spider):
                     yield Request(
                         sub_category_url,
                         self.parse_category,
+                        dont_filter=True,
                         meta={
                             "category_tags": [category, sub_category],
                         },
@@ -42,6 +45,7 @@ class FreeMalaysiaTodaySpider(Spider):
                 yield Request(
                     category_url,
                     self.parse_category,
+                    dont_filter=True,
                     meta={
                         "category_tags": [category],
                     },
@@ -60,6 +64,7 @@ class FreeMalaysiaTodaySpider(Spider):
             yield Request(
                 link.url,
                 self.parse_article,
+                dont_filter=True,
                 meta={
                     "category_tags": response.meta["category_tags"],
                 },
@@ -77,6 +82,7 @@ class FreeMalaysiaTodaySpider(Spider):
         #     yield Request(
         #         link.url,
         #         self.parse_article,
+        #         dont_filter=True,
         #         meta={
         #             "category_tags": response.meta["category_tags"],
         #         },
@@ -85,6 +91,7 @@ class FreeMalaysiaTodaySpider(Spider):
     def parse_article(self, response):
         item = Article()
         soup = BeautifulSoup(response.body, "lxml")
+
         header = soup.find("header", class_="td-post-title")
         content = soup.find("div", class_="td-post-content")
 
@@ -104,5 +111,14 @@ class FreeMalaysiaTodaySpider(Spider):
             tag.text for tag in soup.find("ul", class_="td-tags").find_all("li")[1:]
         ]
         item["source"] = self.name
+
+        # The following block will combine all the relevant categories related to an article
+        # This happens when an article is tagged on two different categories, e.g. tech and automobile
+        if response.url in self.processed_url.keys():
+            category_tags = response.meta["category_tags"].copy()
+            category_tags.extend(self.processed_url[response.url]["category_tags"])
+            item["category_tags"] = list(set(category_tags))
+
+        self.processed_url[response.url] = item
 
         yield item

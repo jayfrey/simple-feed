@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS public.articles (
   ), 
   "title" TEXT NOT NULL, 
   "image_url" TEXT, 
-  "published_date" TIMESTAMP WITH TIME ZONE, 
+  "published_date" VARCHAR(20), 
   "publisher_name" VARCHAR(255), 
   "html_content" TEXT, 
   "page_url" TEXT, 

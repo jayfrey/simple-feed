@@ -107,6 +107,8 @@ class SaysSpider(Spider):
 
     def parse_article(self, response):
 
+        # Some requests will redirect to "exclusive.says.com"
+        # or says.com/my/exclusive, which is irrelevant and not an article
         if not (
             re.search(r"(https:\/\/exclusive.says.com\/my)(.+?)+", response.url)
             or re.search(r"(https:\/\/says.com\/my\/exclusive)(.+?)+", response.url)

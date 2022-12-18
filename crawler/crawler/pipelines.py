@@ -97,11 +97,11 @@ class PostgresDBPipeline:
         select_stmt = f"SELECT {fields} FROM {table} WHERE {where_condition}"
 
         self.cursor.execute(select_stmt)
-        current_data = self.cursor.fetchone()
+        original_data_in_db = self.cursor.fetchone()
 
-        if current_data:
+        if original_data_in_db:
             # Compare with the original items instance instead of the escaped_single_quote_items
-            if current_data != tuple(item.values()):
+            if original_data_in_db != tuple(item.values()):
                 # Perform update if there's a change in value otherwise, skip update
                 new_data = ",".join(
                     [f"{k}='{v}'" for k, v in escaped_single_quote_items.items()]
