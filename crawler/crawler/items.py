@@ -50,6 +50,7 @@ class Article(MyItem):
     publisher_name = Field()
     html_content = Field()
     page_url = Field()
+    category_tags = Field()
     topic = Field()
     tags = Field()
     source = Field(primary=True)

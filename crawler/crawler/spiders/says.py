@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from scrapy.linkextractors import LinkExtractor
 from urllib.parse import urlparse
 from ..constants import DEFAULT_DATETIME_FORMAT
+from crawler.utils.html_helper import normalise_text
 
 import re
 
@@ -58,9 +59,13 @@ class SaysSpider(Spider):
         ).extract_links(response)
 
         for link in links:
+            category = normalise_text(link.text)
             yield Request(
                 link.url,
                 self.parse_category,
+                meta={
+                    "category_tags": [category],
+                },
             )
 
     def parse_category(self, response):
@@ -77,6 +82,9 @@ class SaysSpider(Spider):
             yield Request(
                 link.url,
                 self.parse_article,
+                meta={
+                    "category_tags": response.meta["category_tags"],
+                },
             )
 
         # LATEST MAIN
@@ -92,6 +100,9 @@ class SaysSpider(Spider):
             yield Request(
                 link.url,
                 self.parse_article,
+                meta={
+                    "category_tags": response.meta["category_tags"],
+                },
             )
 
     def parse_article(self, response):
@@ -120,6 +131,7 @@ class SaysSpider(Spider):
 
             item["html_content"] = "".join(filter_article_content(soup))
             item["page_url"] = response.url
+            item["category_tags"] = response.meta["category_tags"]
             item["topic"] = urlparse(response.url).path.split("/")[2]
             item["tags"] = [
                 tag.text[1:] for tag in soup.find_all("a", class_="story-hashtag")

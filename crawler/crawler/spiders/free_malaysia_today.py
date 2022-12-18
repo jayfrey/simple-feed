@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from scrapy.linkextractors import LinkExtractor
 from urllib.parse import urlparse
 from ..constants import DEFAULT_DATETIME_FORMAT
+from crawler.utils.html_helper import normalise_text
 
 
 class FreeMalaysiaTodaySpider(Spider):
@@ -17,19 +18,34 @@ class FreeMalaysiaTodaySpider(Spider):
     user_agent = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Mobile Safari/537.36"
 
     def parse(self, response):
-        links = LinkExtractor(
-            allow=r"(https:\/\/www.freemalaysiatoday.com\/category\/category)(.+?)+",
-            attrs=["href"],
-            tags=["a"],
-            restrict_xpaths=[".//div[@id='td-header-menu']"],
-            allow_domains=self.allowed_domains,
-        ).extract_links(response)
+        # Get and filter menu
+        menus = response.xpath(".//ul[@id='menu-header-menu-1']/li")[0:9]
 
-        for link in links:
-            yield Request(
-                link.url,
-                self.parse_category,
-            )
+        for menu in menus:
+            category = normalise_text(menu.xpath("a/text()").get())
+
+            sub_menus = menu.xpath("ul[contains(@class, 'sub-menu')]/li")
+            if sub_menus:
+                for sub_menu in menu.xpath("ul[contains(@class, 'sub-menu')]/li"):
+                    sub_category = normalise_text(sub_menu.xpath("a/text()").get())
+                    sub_category_url = sub_menu.xpath("a/@href").get()
+
+                    yield Request(
+                        sub_category_url,
+                        self.parse_category,
+                        meta={
+                            "category_tags": [category, sub_category],
+                        },
+                    )
+            else:
+                category_url = normalise_text(menu.xpath("a/@href").get())
+                yield Request(
+                    category_url,
+                    self.parse_category,
+                    meta={
+                        "category_tags": [category],
+                    },
+                )
 
     def parse_category(self, response):
         # LATEST
@@ -44,21 +60,27 @@ class FreeMalaysiaTodaySpider(Spider):
             yield Request(
                 link.url,
                 self.parse_article,
+                meta={
+                    "category_tags": response.meta["category_tags"],
+                },
             )
 
-        # MAIN
-        links = LinkExtractor(
-            attrs=["href"],
-            tags=["a"],
-            restrict_xpaths=[".//div[contains(@class, 'td-ss-main-content')]"],
-            allow_domains=self.allowed_domains,
-        ).extract_links(response)
+        # MAIN - uncomment to scrape articles from the main a.k.a bottom section of the landing sub menu page
+        # links = LinkExtractor(
+        #     attrs=["href"],
+        #     tags=["a"],
+        #     restrict_xpaths=[".//div[contains(@class, 'td-ss-main-content')]"],
+        #     allow_domains=self.allowed_domains,
+        # ).extract_links(response)
 
-        for link in links:
-            yield Request(
-                link.url,
-                self.parse_article,
-            )
+        # for link in links:
+        #     yield Request(
+        #         link.url,
+        #         self.parse_article,
+        #         meta={
+        #             "category_tags": response.meta["category_tags"],
+        #         },
+        #     )
 
     def parse_article(self, response):
         item = Article()
@@ -76,6 +98,7 @@ class FreeMalaysiaTodaySpider(Spider):
         )
         item["html_content"] = "".join(map(str, content.find_all(["figure", "p"])[1:]))
         item["page_url"] = response.url
+        item["category_tags"] = response.meta["category_tags"]
         item["topic"] = urlparse(response.url).path.split("/")[2]
         item["tags"] = [
             tag.text for tag in soup.find("ul", class_="td-tags").find_all("li")[1:]

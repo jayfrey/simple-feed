@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public.articles (
   "publisher_name" VARCHAR(255), 
   "html_content" TEXT, 
   "page_url" TEXT, 
+  "category_tags" TEXT[], 
   "topic" VARCHAR(255), 
   "tags" TEXT[], 
   "source" VARCHAR(255), 

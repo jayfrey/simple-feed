@@ -3,9 +3,21 @@ from datetime import datetime, timedelta
 from crawler.items import Article
 from ..constants import DEFAULT_DATETIME_FORMAT
 from twisted.internet import reactor, defer
+from crawler.utils.html_helper import normalise_text
 
 import json
 import urllib.parse
+
+CATEGORIES = {
+    "berita": "9206",
+    "sukan": "9207",
+    "dunia": "9208",
+    "hiburan": "9209",
+    "bisnes": "9210",
+    "rencana": "9211",
+    "wanita": "9212",
+    "hujung minggu": "9213",
+}
 
 
 class BeritaHarianSpider(Spider):
@@ -16,19 +28,7 @@ class BeritaHarianSpider(Spider):
     base_url = "https://www.bharian.com.my/"
 
     def parse(self, response):
-
-        # Category ID
-        # berita - 9206
-        # sukan - 9207
-        # dunia - 9208
-        # hiburan - 9209
-        # bisnes - 9210
-        # rencana - 9211
-        # wanita - 9212
-        # hujung minggu - 9213
-        category_ids = [str(int(str(i).zfill(3)) + 9200) for i in range(6, 14)]
-
-        for category_id in category_ids:
+        for category, category_id in CATEGORIES.items():
             url = self.base_url + "api/collections/" + category_id + "?"
             params = {
                 "page": "0",
@@ -39,14 +39,17 @@ class BeritaHarianSpider(Spider):
                 url + urllib.parse.urlencode(params),
                 self.parse_latest_articles,
                 dont_filter=True,
+                meta={
+                    "category": category,
+                },
             )
 
     def parse_latest_articles(self, response):
         body_string = response.body.decode("utf-8")
         articles = json.loads(body_string)
 
-        # The collections API from Berita Harian response is inconsistent,
-        # very often latest articles are not returned out of the 8 requests
+        # The collections API response is quite inconsistent, very often
+        # latest articles are not returned out of the 8 requests
         # that was made to fetch the latest articles.
         #
         # In here, request will be deferred and retry later if articles
@@ -57,6 +60,9 @@ class BeritaHarianSpider(Spider):
                 response.url,
                 self.deferred_parse_latest_articles,
                 dont_filter=True,
+                meta={
+                    "category": response.meta["category"],
+                },
             )
         else:
             print(f"{response.url} - OK")
@@ -65,7 +71,6 @@ class BeritaHarianSpider(Spider):
 
                 item["title"] = article["title"]
                 item["image_url"] = article["field_article_images"][0]["url"]
-
                 item["published_date"] = (
                     datetime.fromtimestamp(article["created"]) + timedelta(hours=8)
                 ).strftime(DEFAULT_DATETIME_FORMAT)
@@ -75,7 +80,14 @@ class BeritaHarianSpider(Spider):
 
                 item["html_content"] = article["body"]
                 item["page_url"] = article["url"]
-                item["topic"] = article["field_article_topic"]["name"]
+
+                topic = article["field_article_topic"]["name"]
+
+                item["category_tags"] = [
+                    response.meta["category"],
+                    normalise_text(topic),
+                ]
+                item["topic"] = topic
 
                 if article["field_tags"]:
                     item["tags"] = [tag["name"] for tag in article["field_tags"]]
@@ -84,15 +96,20 @@ class BeritaHarianSpider(Spider):
 
                 yield item
 
+    # Schedule to retry url that returned response with no articles in 10 seconds
     def deferred_parse_latest_articles(self, response):
         d = defer.Deferred()
+        seconds = 10
         reactor.callLater(
-            10,
+            seconds,
             d.callback,
             Request(
                 response.url,
                 self.parse_latest_articles,
                 dont_filter=True,
+                meta={
+                    "category": response.meta["category"],
+                },
             ),
         )
         return d
