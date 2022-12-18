@@ -1,4 +1,12 @@
-scrapy
-beautifulsoup4
-pymongo
-psycopg2
+###### Requirements with Version Specifiers ######
+
+# <package name> == 0.6.1      # Version Matching. Must be version 0.6.1
+# <package name> >= 4.1.1      # Minimum version 4.1.1
+# <package name> != 3.5        # Version Exclusion. Anything except version 3.5
+# <package name> ~= 1.1        # Compatible release. Same as >= 1.1, == 1.*
+
+scrapy >= 2.7.1
+beautifulsoup4 >= 4.11.1
+pymongo >= 4.3.3
+psycopg2 >= 2.9.5
+

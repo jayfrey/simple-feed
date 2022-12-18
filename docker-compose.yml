@@ -6,8 +6,9 @@ services:
       context: ./crawler
     volumes:
       - ./crawler:/app
-    stdin_open: true
-    tty: true
+    # Uncomment the following line to have the service stay alive
+    # stdin_open: true
+    # tty: true
     environment:
       - MONGO_URI=mongodb://admin:abc@mongo:27017
       - MONGO_DB=scraped_data

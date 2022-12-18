@@ -28,12 +28,22 @@ if __name__ == "__main__":
     parser.add_argument(
         "--docker-compose-command",
         default="docker-compose",
-        help="docker-compose command default: docker-compose",
+        help=textwrap.dedent(
+            """\
+                Specify docker-compose command. 
+                Default: docker-compose
+            """,
+        ),
     )
     parser.add_argument(
         "--docker-compose-file",
         default="docker-compose.yml",
-        help="docker-compose file: docker-compose.yml",
+        help=textwrap.dedent(
+            """\
+                Specify docker-compose file. 
+                Default: docker-compose.yml
+            """,
+        ),
     )
     parser.add_argument(
         "-s",
@@ -41,7 +51,13 @@ if __name__ == "__main__":
         nargs="+",
         type=str,
         default=["says", "free_malaysia_today", "berita_harian"],
-        help="Specify one or more sources to run crawler to scrape articles",
+        help=textwrap.dedent(
+            """\
+                Specify one or more sources to run crawler to scrape articles. 
+                By default, it will scrape all of the sources.
+                Supported sources: says, free_malaysia_today or berita_harian
+            """,
+        ),
     )
 
     args = parser.parse_args()
