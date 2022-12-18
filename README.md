@@ -1,5 +1,5 @@
 # Simple News Feed
-This is a simple news feed to scrape articles from social news (namely SAYS, Free Malaysia Today, and Berita Harian).
+A simple news feed that scrape articles from social news (namely SAYS, Free Malaysia Today, and Berita Harian).
 
 ### Tech Stack
 * Scrapy (2.7.1)

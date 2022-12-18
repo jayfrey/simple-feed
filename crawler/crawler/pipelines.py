@@ -56,7 +56,7 @@ class MongoDBPipeline:
 
 class PostgresDBPipeline:
     """
-    To enable PostgresDBPipeline, be sure the it's uncommented in setting.py
+    To enable PostgresDBPipeline, be sure the "crawler.pipelines.PostgresDBPipeline" it's uncommented under ITEM_PIPELINES in setting.py
     """
 
     def __init__(self, postgres_details):
