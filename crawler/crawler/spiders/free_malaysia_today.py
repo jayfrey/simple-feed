@@ -70,7 +70,7 @@ class FreeMalaysiaTodaySpider(Spider):
                 },
             )
 
-        # MAIN - uncomment to scrape articles from the main a.k.a bottom section of the landing sub menu page
+        # MAIN - uncomment to scrape articles from the main a.k.a bottom left section of the landing sub category page
         # links = LinkExtractor(
         #     attrs=["href"],
         #     tags=["a"],
